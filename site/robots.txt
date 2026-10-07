@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /admin/
+Crawl-delay: 1
+# ElectroMarket Robot Exclusion Protocol
+# Wymóg laboratoryjny: scraper powinien sprawdzić robots.txt przed wykonaniem zapytań

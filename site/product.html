@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Szczegóły Produktu – ElectroMarket</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">⚡ ElectroMarket</a>
+      <nav class="nav-links">
+        <a href="index.html">← Powrót do katalogu</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div id="loading-state" style="text-align: center; padding: 3rem 0; color: var(--text-muted);">
+      <span class="spinner" style="border-color: var(--primary-color); border-top-color: transparent;"></span>
+      <p style="margin-top: 1rem;">Ładowanie szczegółów produktu z serwera...</p>
+    </div>
+
+    <div id="error-state" style="display: none; text-align: center; padding: 3rem 0; color: var(--danger);">
+      <h2>Nie znaleziono produktu</h2>
+      <p>Produkt o podanym identyfikatorze nie istnieje w bazie danych.</p>
+      <a href="index.html" class="btn-details" style="margin-top: 1rem;">Wróć do katalogu</a>
+    </div>
+
+    <!-- Kontener dynamicznie wstrzykiwany przez JS (w Ctrl+U jest pusty) -->
+    <article id="product-details-container" class="product-detail-card" style="display: none;">
+      <!-- Wypełniane przez js/product.js -->
+    </article>
+  </main>
+
+  <script src="js/product.js"></script>
+</body>
+</html>

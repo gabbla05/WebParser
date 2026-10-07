@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElectroMarket – Oficjalny Katalog Produktów</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">⚡ ElectroMarket</a>
+      <nav class="nav-links">
+        <a href="index.html">Katalog Główny</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1 class="page-title">Katalog Sprzętu Komputerowego i Elektroniki</h1>
+    <p class="page-desc">
+      Witamy w demonstracyjnym katalogu produktów. Wszystkie pozycje ładowane są dynamicznie przez API.
+    </p>
+
+    <!-- Statystyki katalogu -->
+    <div class="catalog-stats">
+      <div>Łącznie w bazie: <strong id="total-db-count">420</strong></div>
+      <div>Aktualnie załadowano: <strong id="loaded-count">0</strong></div>
+    </div>
+
+    <!-- Sekcja 1: Karty produktów (struktura typu article) -->
+    <section aria-labelledby="grid-heading">
+      <h2 id="grid-heading" style="margin-bottom: 1rem; font-size: 1.3rem;">Wyróżnione produkty</h2>
+      <div id="products-grid" class="products-grid">
+        <!-- Elementy wstrzykiwane dynamicznie przez JavaScript (fetch) -->
+      </div>
+    </section>
+
+    <!-- Sekcja 2: Tabela produktów (struktura alternatywna: tabela) -->
+    <section class="table-section" id="table-section" style="display: none;">
+      <div class="table-header-title">Zestawienie tabelaryczne ofert</div>
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Nazwa</th>
+            <th>Kategoria</th>
+            <th>Producent</th>
+            <th>Cena</th>
+            <th>Dostępność</th>
+            <th>Ocena (opinie)</th>
+            <th>Data dodania</th>
+            <th>Gwarancja</th>
+            <th>Akcja</th>
+          </tr>
+        </thead>
+        <tbody id="products-table-body">
+          <!-- Wiersze wstrzykiwane dynamicznie przez JavaScript -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Kontrolka doładowywania porcjami (przycisk Wczytaj więcej) -->
+    <div class="load-more-container">
+      <button id="btn-load-more" class="btn-load-more" type="button">
+        <span class="btn-text">Wczytaj więcej produktów</span>
+        <span class="spinner" id="btn-spinner" style="display: none;"></span>
+      </button>
+      <div id="end-message" class="end-of-records" style="display: none;">
+        Wszystkie dostępne produkty zostały załadowane.
+      </div>
+    </div>
+  </main>
+
+  <footer style="text-align: center; padding: 2rem 0; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
+    <div class="header-container" style="justify-content: center; gap: 2rem;">
+      <span>© 2026 ElectroMarket – Serwis laboratoryjny</span>
+      <a href="regulamin.html" style="color: var(--primary-color);">Regulamin serwisu</a>
+      <a href="robots.txt" style="color: var(--primary-color);">robots.txt</a>
+    </div>
+  </footer>
+
+  <script src="js/catalog.js"></script>
+</body>
+</html>
