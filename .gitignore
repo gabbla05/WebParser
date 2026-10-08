@@ -1,0 +1,27 @@
+# Python bytecode and cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local logs and generated scraper output
+*.log
+/scraper/output/
+
+# Local environment and editor/OS files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
