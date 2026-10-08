@@ -2,6 +2,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from urllib.parse import urljoin
+
 
 class CatalogScraper:
 
@@ -65,3 +67,35 @@ class CatalogScraper:
                     )
                 ) > current_count
             )
+
+    # W catalog każdy produkt zawiera link:
+    # <a class="btn-details odnosnik" href="product.html?id=...">
+    # oraz drugi link w nazwie produktu.
+
+    def collect_product_links(self) -> list[str]:
+
+        links = []
+
+        elements = self.driver.find_elements(
+            By.CSS_SELECTOR,
+            ".odnosnik"
+        )
+
+        for element in elements:
+
+            href = element.get_attribute("href")
+
+            if href:
+                links.append(href)
+
+        #unique_links = sorted(set(links))
+
+        self.logger.info(
+            f"Wszystkich linków: {len(links)}"
+        )
+
+        self.logger.info(
+            f"Po usunięciu duplikatów: {len(set(links))}"
+        )
+
+        return links
