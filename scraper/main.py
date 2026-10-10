@@ -1,8 +1,11 @@
+from pprint import pprint
+
 from browser import create_driver
 from logging_config import configure_logging
 
 from scraper.catalog_scraper import CatalogScraper
 from scraper.product_scraper import ProductScraper
+
 
 def main():
 
@@ -12,16 +15,16 @@ def main():
 
     try:
 
-        scraper = CatalogScraper(
+        catalog_scraper = CatalogScraper(
             driver=driver,
             logger=logger
         )
 
-        scraper.open_catalog(
+        catalog_scraper.open_catalog(
             "http://localhost:8000"
         )
 
-        scraper.load_all_products()
+        catalog_scraper.load_all_products()
 
         products = driver.find_elements(
             "css selector",
@@ -32,45 +35,40 @@ def main():
             f"Znaleziono {len(products)} produktów"
         )
 
-        links = scraper.collect_product_links()
+        links = catalog_scraper.collect_product_links()
+
+        logger.info(
+            f"Zebrano {len(links)} linków"
+        )
 
         product_scraper = ProductScraper(
             driver=driver,
             logger=logger
         )
 
-        first_product = links[0]
+        all_products = []
 
-        logger.info(
-            f"Test produktu: {first_product}"
-        )
+        # Celowo tylko 10 produktów na razie
+        for url in links[:10]:
 
-        product_scraper.open_product(
-            first_product
-        )
+            product = product_scraper.extract_product(url)
 
-        product_scraper.expand_specification()
-
-        specs = product_scraper.get_specification()
-
-        logger.info(
-            f"Znaleziono {len(specs)} parametrów"
-        )
-
-        for key, value in specs.items():
+            all_products.append(product)
 
             logger.info(
-                f"{key} = {value}"
+                f"Pobrano produkt ID={product['id']}"
             )
 
         logger.info(
-            f"Unikalnych linków: {len(links)}"
+            f"Pobrano łącznie: {len(all_products)}"
         )
 
         logger.info(
-            f"Przykładowy link: {links[0]}"
+            f"Liczba kolumn: {len(all_products[0])}"
         )
 
+        pprint(all_products[0])
+    
     finally:
         driver.quit()
 
