@@ -14,5 +14,10 @@ def create_driver(headless: bool = False) -> webdriver.Chrome:
 
     options.add_argument("--start-maximized")
     options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--remote-allow-origins=*")
+    options.page_load_strategy = "eager"
 
     return webdriver.Chrome(options=options)

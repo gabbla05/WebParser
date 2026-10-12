@@ -14,11 +14,13 @@ import collections
 import http.server
 import socketserver
 import sys
+import threading
 import time
 from pathlib import Path
 
-# Słownik śledzący czasy żądań dla każdego adresu IP
+# Słownik śledzący czasy żądań dla każdego adresu IP oraz blokada wątkowa
 IP_REQUEST_TIMESTAMPS = collections.defaultdict(list)
+IP_LOCK = threading.Lock()
 
 class RateLimitedHandler(http.server.SimpleHTTPRequestHandler):
     """Niestandardowy handler HTTP z mechanizmem Rate Limitingu zwracającym HTTP 429."""
@@ -35,17 +37,18 @@ class RateLimitedHandler(http.server.SimpleHTTPRequestHandler):
 
         client_ip = self.client_address[0]
         now = time.time()
-        timestamps = IP_REQUEST_TIMESTAMPS[client_ip]
+        with IP_LOCK:
+            timestamps = IP_REQUEST_TIMESTAMPS[client_ip]
 
-        # Usuwamy znaczniki starsze niż 1 sekunda
-        IP_REQUEST_TIMESTAMPS[client_ip] = [t for t in timestamps if now - t < 1.0]
-        timestamps = IP_REQUEST_TIMESTAMPS[client_ip]
+            # Usuwamy znaczniki starsze niż 1 sekunda
+            IP_REQUEST_TIMESTAMPS[client_ip] = [t for t in timestamps if now - t < 1.0]
+            timestamps = IP_REQUEST_TIMESTAMPS[client_ip]
 
-        if len(timestamps) >= self.max_rps:
-            return True
+            if len(timestamps) >= self.max_rps:
+                return True
 
-        timestamps.append(now)
-        return False
+            timestamps.append(now)
+            return False
 
     def do_GET(self):
         if self.is_rate_limited():
@@ -77,10 +80,10 @@ def run(port=8000, max_rps=10, retry_after=2, rate_limit_enabled=True):
             **kwargs
         )
 
-    socketserver.TCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
 
     try:
-        with socketserver.TCPServer(("", port), handler_factory) as httpd:
+        with socketserver.ThreadingTCPServer(("", port), handler_factory) as httpd:
             print("=" * 70)
             print("🚀 Niestandardowy Serwer HTTP ElectroMarket (Zgodny z wymogami 5.0)")
             print(f"👉 Adres serwisu: http://localhost:{port}/")
