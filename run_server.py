@@ -18,6 +18,11 @@ import threading
 import time
 from pathlib import Path
 
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 # Słownik śledzący czasy żądań dla każdego adresu IP oraz blokada wątkowa
 IP_REQUEST_TIMESTAMPS = collections.defaultdict(list)
 IP_LOCK = threading.Lock()
