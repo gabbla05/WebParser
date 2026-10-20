@@ -19,6 +19,13 @@ MISSING_VALUES = {
     ""
 }
 
+# w przyszłości można by pobierać kursy z API NBP np. ale na potrzebe ćwiczenia przyjmujemy stałe kursy
+CURRENCY_RATES_TO_PLN = {
+    "PLN": 1.0,
+    "EUR": 4.30,
+    "USD": 3.95,
+}
+
 
 def normalize_missing(value: Any) -> Optional[str]:
     """Zwraca None jeśli wartość oznacza brak danych lub jest pusta."""
@@ -45,11 +52,24 @@ def decode_html_entities(text: Optional[str]) -> Optional[str]:
     return decoded
 
 
-def clean_price(value: Any) -> Optional[float]:
-    """
-    Czyści i konwertuje cenę (np. '1 299,00 zł', '$1 299.00', '1 299,00 EUR') na float.
-    Obsługuje encje HTML (&nbsp;), twarde spacje, przecinki i kropki.
-    """
+def _price_currency(value: Any, currency: Optional[str] = None) -> Optional[str]:
+    """Ustala obsługiwaną walutę z argumentu lub oznaczenia w tekście ceny."""
+    if currency:
+        normalized = currency.strip().upper()
+        return normalized if normalized in CURRENCY_RATES_TO_PLN else None
+
+    text = str(value).upper()
+    if "EUR" in text:
+        return "EUR"
+    if "USD" in text or "$" in text:
+        return "USD"
+    if "PLN" in text or "ZŁ" in text:
+        return "PLN"
+    return "PLN"
+
+
+def _parse_price_amount(value: Any, currency: Optional[str] = None) -> Optional[float]:
+    """Parsuje samą kwotę źródłową bez przeliczania jej na PLN."""
     if value is None:
         return None
 
@@ -60,29 +80,47 @@ def clean_price(value: Any) -> Optional[float]:
     if not val_str or normalize_missing(val_str) is None:
         return None
 
-    # Usunięcie symboli walut i spacji
-    val_str = val_str.replace("zł", "").replace("PLN", "").replace("EUR", "").replace("$", "").strip()
+    normalized_currency = _price_currency(val_str, currency)
+    if normalized_currency is None:
+        return None
 
-    # Zostawiamy tylko cyfry, przecinki i kropki
+    val_str = re.sub(r"(?i)PLN|EUR|USD|zł", "", val_str).replace("$", "").strip()
     val_str = re.sub(r"[^\d,\.]", "", val_str)
     if not val_str:
         return None
 
-    # Obsługa separatorów: np. 1.299,00 lub 1,299.00 lub 1299,00
     if "," in val_str and "." in val_str:
         if val_str.rfind(",") > val_str.rfind("."):
-            # Format europejski: 1.299,00 -> 1299.00
             val_str = val_str.replace(".", "").replace(",", ".")
         else:
-            # Format US: 1,299.00 -> 1299.00
             val_str = val_str.replace(",", "")
     elif "," in val_str:
-        val_str = val_str.replace(",", ".")
+        trailing_digits = len(val_str.rsplit(",", 1)[-1])
+        if normalized_currency == "USD" and trailing_digits == 3:
+            val_str = val_str.replace(",", "")
+        else:
+            val_str = val_str.replace(",", ".")
 
     try:
         return round(float(val_str), 2)
     except ValueError:
         return None
+
+
+def clean_price(value: Any, currency: Optional[str] = None) -> Optional[float]:
+    """
+    Czyści i konwertuje cenę (np. '1 299,00 zł', '$1 299.00', '1 299,00 EUR') na float.
+    Obsługuje encje HTML (&nbsp;), twarde spacje, przecinki i kropki.
+    """
+    normalized_currency = _price_currency(value, currency)
+    if normalized_currency is None:
+        return None
+
+    amount = _parse_price_amount(value, normalized_currency)
+    if amount is None:
+        return None
+
+    return round(amount * CURRENCY_RATES_TO_PLN[normalized_currency], 2)
 
 
 def clean_date(value: Any, reference_date: Optional[datetime] = None) -> Optional[str]:
@@ -211,7 +249,7 @@ def clean_warranty_months(value: Any) -> Optional[int]:
     return None
 
 
-def clean_numeric_spec(value: Any, target_type=int) -> Optional[Any]:
+def clean_numeric_spec(value: Any, target_type: type[int | float] = int) -> Optional[Any]:
     """Wyciąga wartość numeryczną ze specyfikacji (np. '16 GB' -> 16, '1.85 kg' -> 1.85)."""
     if value is None:
         return None
@@ -261,18 +299,19 @@ def clean_product_record(raw_product: dict, reference_date: Optional[datetime] =
     cleaned["dostepnosc"] = decode_html_entities(normalize_missing(raw_product.get("dostepnosc")))
 
     # Waluta i ceny
-    cleaned["waluta"] = raw_product.get("waluta") or "PLN"
-    cleaned["cena"] = clean_price(raw_product.get("cena") or raw_product.get("cena_tekst"))
-    
-    # Cena bazowa w PLN (jeśli dostępna z data-*)
+    currency = (raw_product.get("waluta") or "PLN").upper()
+    source_price = raw_product.get("cena") or raw_product.get("cena_tekst")
+    cleaned["waluta"] = currency
+    cleaned["cena_zrodlowa"] = _parse_price_amount(source_price, currency)
     base_pln = raw_product.get("cena_bazowa_pln")
-    cleaned["cena_bazowa_pln"] = clean_price(base_pln) if base_pln else cleaned["cena"]
+    cleaned["cena"] = clean_price(base_pln, "PLN") if base_pln is not None else clean_price(source_price, currency)
 
     # Ocena i opinie
     cleaned["ocena"] = clean_rating(raw_product.get("ocena"))
-    cleaned["liczba_opinii"] = clean_reviews_count(
-        raw_product.get("liczba_opinii") or raw_product.get("ocena")
-    )
+    reviews_value = raw_product.get("liczba_opinii")
+    if reviews_value is None and isinstance(raw_product.get("ocena"), str):
+        reviews_value = raw_product["ocena"]
+    cleaned["liczba_opinii"] = clean_reviews_count(reviews_value)
 
     # Data dodania
     cleaned["data_dodania"] = clean_date(raw_product.get("data_dodania"), reference_date=reference_date)
@@ -297,7 +336,9 @@ def clean_product_record(raw_product: dict, reference_date: Optional[datetime] =
     # Cechy z data-* (jeśli przekazane)
     cleaned["stawka_vat"] = raw_product.get("stawka_vat") or raw_product.get("data_vat")
     cleaned["klasa_energetyczna"] = raw_product.get("klasa_energetyczna") or raw_product.get("data_energy_class")
-    stock = raw_product.get("stan_magazynowy_sztuk") or raw_product.get("data_stock_count")
+    stock = raw_product.get("stan_magazynowy_sztuk")
+    if stock is None:
+        stock = raw_product.get("data_stock_count")
     cleaned["stan_magazynowy_sztuk"] = clean_numeric_spec(stock, int) if stock is not None else None
 
     return cleaned

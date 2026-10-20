@@ -31,12 +31,14 @@ class RateLimitedHandler(http.server.SimpleHTTPRequestHandler):
     """Niestandardowy handler HTTP z mechanizmem Rate Limitingu zwracającym HTTP 429."""
 
     def __init__(self, *args, rate_limit_enabled=True, max_rps=10, retry_after=2, **kwargs):
+        """Zachowuje konfigurację limitera dla pojedynczego klienta HTTP."""
         self.rate_limit_enabled = rate_limit_enabled
         self.max_rps = max_rps
         self.retry_after = retry_after
         super().__init__(*args, **kwargs)
 
     def is_rate_limited(self) -> bool:
+        """Odrzuca żądanie, gdy klient przekroczył limit w ostatniej sekundzie."""
         if not self.rate_limit_enabled:
             return False
 
@@ -56,12 +58,16 @@ class RateLimitedHandler(http.server.SimpleHTTPRequestHandler):
             return False
 
     def do_GET(self):
+        """Obsługuje GET, zwracając 429 przed podaniem pliku przy przekroczeniu limitu."""
         if self.is_rate_limited():
             self.send_response(429)
             self.send_header("Retry-After", str(self.retry_after))
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
-            msg = f"429 Too Many Requests: Przekroczono limit {self.max_rps} żądań/sek. Odczekaj {self.retry_after}s zgodnie z Retry-After.\n"
+            msg = (
+                f"429 Too Many Requests: Przekroczono limit {self.max_rps} żądań/sek.\n"
+                f"Retry-After: {self.retry_after}\n"
+            )
             self.wfile.write(msg.encode("utf-8"))
             print(f"⚠️ [RATE LIMIT] Zwrócono HTTP 429 dla {self.client_address[0]} (Retry-After: {self.retry_after}s)")
             return
@@ -70,12 +76,14 @@ class RateLimitedHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def run(port=8000, max_rps=10, retry_after=2, rate_limit_enabled=True):
+    """Uruchamia wielowątkowy serwer statycznego katalogu z opcjonalnym limiterem."""
     site_dir = Path(__file__).resolve().parent / "site"
     if not site_dir.exists():
         print(f"BŁĄD: Katalog serwisu {site_dir} nie istnieje!")
         sys.exit(1)
 
     def handler_factory(*args, **kwargs):
+        """Tworzy handler skonfigurowany dla katalogu i limitu tej instancji serwera."""
         return RateLimitedHandler(
             *args,
             directory=str(site_dir),

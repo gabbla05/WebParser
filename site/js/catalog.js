@@ -7,6 +7,7 @@
  * - Atrybuty semantyczne oraz data-* (data-id, data-rating, data-stock)
  */
 
+/** Initializes catalog data loading and the load-more interaction after DOM readiness. */
 document.addEventListener("DOMContentLoaded", () => {
   const BATCH_SIZE = 35;
   let allProducts = [];
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  /** Returns the visual badge class for a product's availability. */
   function getBadgeClass(dostepnosc) {
     if (dostepnosc.includes("magazynie")) return "badge-in-stock";
     if (dostepnosc.includes("sztuki")) return "badge-last-items";
@@ -55,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return "badge-shipping";
   }
 
+  /** Builds one article card and exposes scraper-facing semantic attributes. */
   function renderCard(product) {
     const card = document.createElement("article");
     card.className = "product-card produkt";
@@ -101,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
+  /** Builds one table row for products assigned to the alternate catalog layout. */
   function renderTableRow(product) {
     const tr = document.createElement("tr");
     tr.className = "product-row produkt";
@@ -135,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return tr;
   }
 
+  /** Delays and renders the next product batch, then updates the end-of-data state. */
   function loadNextBatch() {
     isLoading = true;
     btnLoadMore.disabled = true;

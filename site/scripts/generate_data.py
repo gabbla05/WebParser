@@ -1,6 +1,6 @@
 """
 Skrypt generatora danych do serwisu e-commerce (Rola: AUTOR).
-Generuje bazę 420 produktów (minimum 400 na ocenę 5.0) z 24 atrybutami (minimum 22).
+Generuje bazę 420 produktów (minimum 400 na ocenę 5.0) z 28 polami źródłowymi (minimum 22).
 
 Zawiera celowe utrudnienia:
 1. Różne waluty i formaty cen (PLN, EUR, USD, twarde spacje, przecinki, encje &nbsp;).
@@ -82,6 +82,7 @@ def generate_date(idx):
         return f"{random.randint(2, 6)} dni temu"
 
 def create_raw_product(p_id):
+    """Tworzy syntetyczny produkt z celowo zróżnicowanymi formatami i brakami."""
     producer = random.choice(PRODUCERS)
     category = random.choice(CATEGORIES)
     model_num = random.randint(100, 999)
@@ -153,6 +154,7 @@ def create_raw_product(p_id):
     }
 
 def main():
+    """Generuje 410 rekordów bazowych, dodaje duplikaty i zapisuje JSON."""
     total_unique = 410
     products = [create_raw_product(i + 1) for i in range(total_unique)]
     

@@ -7,6 +7,7 @@ from processing.validators import ProductValidator
 
 
 def test_validator_valid_product():
+    """Akceptuje rekord z poprawnymi typami i wartościami."""
     validator = ProductValidator()
     products = [{
         "id": 1,
@@ -26,6 +27,7 @@ def test_validator_valid_product():
 
 
 def test_validator_invalid_types_and_ranges():
+    """Odrzuca wartości poza zakresem i czyści błędne pola."""
     validator = ProductValidator()
     products = [{
         "id": 1,

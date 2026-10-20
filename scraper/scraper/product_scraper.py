@@ -13,10 +13,12 @@ from selenium.common.exceptions import WebDriverException, TimeoutException
 
 class ProductScraper:
 
-    def __init__(self, driver, logger, max_retries: int = 3):
+    def __init__(self, driver, logger, max_retries: int = 3, policy=None):
+        """Konfiguruje ekstrakcję produktów, retry i diagnostyczne zrzuty błędów."""
         self.driver = driver
         self.logger = logger
         self.max_retries = max_retries
+        self.policy = policy
 
         # Katalogi na diagnostykę błędów (rozszerzenie 5.0)
         self.logs_dir = Path(__file__).resolve().parent.parent / "logs"
@@ -62,6 +64,8 @@ class ProductScraper:
 
     def open_product(self, url: str) -> None:
         """Nawiguje do podstrony i czeka na wyrenderowanie dynamicznego kontenera."""
+        if self.policy:
+            self.policy.before_request(url)
         self.driver.get(url)
 
         # Sprawdzenie 429
@@ -152,15 +156,19 @@ class ProductScraper:
                     if "data_stock_count" in catalog_meta:
                         product["stan_magazynowy_sztuk"] = catalog_meta["data_stock_count"]
 
+                if self.policy:
+                    self.policy.mark_request_complete()
+
                 return product
 
             except Exception as e:
                 last_exception = e
                 self._save_error_diagnostics(url, attempt, str(e))
 
-                # Jeśli to kod 429 z Retry-After
-                if "429" in str(e):
-                    sleep_time = 2.0
+                # Przy 429 respektujemy wartość Retry-After odczytaną z odpowiedzi.
+                retry_after = self._check_for_429()
+                if retry_after is not None:
+                    sleep_time = retry_after
                     self.logger.warning(
                         f"Wykryto kod 429 dla {url}. Czekam {sleep_time}s zgodnie z Retry-After..."
                     )
@@ -177,4 +185,8 @@ class ProductScraper:
         self.logger.error(
             f"Nie udało się pobrać produktu {url} po {self.max_retries} próbach: {last_exception}"
         )
-        raise last_exception
+
+        if last_exception is not None:
+            raise last_exception
+        else:
+            raise RuntimeError(f"Nie udało się pobrać produktu po {self.max_retries} próbach (brak szczegółów błędu).")

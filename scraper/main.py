@@ -1,18 +1,19 @@
 import argparse
 import os
+import socket
 import subprocess
 import sys
 import time
-import urllib.request
+from urllib.parse import urlsplit
 from datetime import datetime
 from pathlib import Path
 from pprint import pprint
 
 # Konfiguracja UTF-8 dla konsoli Windows
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8") # type: ignore
 if sys.stderr and hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8") # type: ignore
 
 # Upewnienie się, że katalog scraper jest w sys.path
 CURRENT_DIR = Path(__file__).resolve().parent
@@ -28,16 +29,24 @@ from processing.cleaners import clean_product_record
 from processing.validators import ProductValidator
 from processing.deduplicator import ProductDeduplicator
 from export.exporter import DataExporter
+from policy import inspect_site_policy
 
 
 def ensure_server_running(url: str = "http://localhost:8000", logger = None):
-    """Sprawdza czy lokalny serwer działa; jeśli nie, uruchamia run_server.py w tle."""
+    """Sprawdza lokalny serwer bez wysyłania żądania HTTP przed kontrolą polityki."""
+    parsed_url = urlsplit(url)
+    host = parsed_url.hostname or "localhost"
+    port = parsed_url.port or (443 if parsed_url.scheme == "https" else 80)
+    is_local = host in {"localhost", "127.0.0.1", "::1"}
+
+    if not is_local:
+        return None
+
     try:
-        with urllib.request.urlopen(url, timeout=1.5) as resp:
-            if resp.status == 200:
-                if logger:
-                    logger.info("Serwer http://localhost:8000 jest już aktywny")
-                return None
+        with socket.create_connection((host, port), timeout=1.0):
+            if logger:
+                logger.info(f"Lokalny serwer {host}:{port} jest już aktywny")
+            return None
     except Exception:
         pass
 
@@ -57,15 +66,14 @@ def ensure_server_running(url: str = "http://localhost:8000", logger = None):
         stderr=subprocess.DEVNULL
     )
 
-    # Czekamy na wstanie serwera
+    # Sprawdzamy gotowość połączeniem TCP, bez pobierania treści serwisu.
     for _ in range(10):
         time.sleep(0.5)
         try:
-            with urllib.request.urlopen(url, timeout=1.0) as resp:
-                if resp.status == 200:
-                    if logger:
-                        logger.info("Serwer pomyślnie wystartował!")
-                    return proc
+            with socket.create_connection((host, port), timeout=1.0):
+                if logger:
+                    logger.info("Serwer pomyślnie wystartował!")
+                return proc
         except Exception:
             continue
 
@@ -75,6 +83,7 @@ def ensure_server_running(url: str = "http://localhost:8000", logger = None):
 
 
 def parse_args():
+    """Parsuje adres katalogu, limit rekordów i wybór trybu przeglądarki."""
     parser = argparse.ArgumentParser(description="WebParser - Scraper ElectroMarket (Poziom 5.0)")
     parser.add_argument(
         "--url",
@@ -96,6 +105,7 @@ def parse_args():
 
 
 def main():
+    """Uruchamia kontrolę polityki, scrapowanie, walidację, deduplikację i eksport."""
     args = parse_args()
     logger = configure_logging()
 
@@ -107,13 +117,16 @@ def main():
     # 1. Sprawdzenie / uruchomienie serwera
     server_proc = ensure_server_running(args.url, logger=logger)
 
+    # 2. Odczyt robots.txt i regulaminu przed uruchomieniem przeglądarki.
+    site_policy = inspect_site_policy(args.url, logger=logger)
+
     headless_mode = not args.visible
     logger.info(f"Inicjalizacja Chrome WebDriver (headless={headless_mode})...")
     driver = create_driver(headless=headless_mode)
 
     try:
-        # 2. Katalog i doładowywanie rekordów
-        catalog_scraper = CatalogScraper(driver=driver, logger=logger)
+        # 3. Katalog i doładowywanie rekordów
+        catalog_scraper = CatalogScraper(driver=driver, logger=logger, policy=site_policy)
         catalog_scraper.open_catalog(args.url)
 
         logger.info("Doładowywanie wszystkich produktów przyciskiem 'Wczytaj więcej'...")
@@ -128,7 +141,7 @@ def main():
             logger.info(f"Zastosowano limit do pierwszych {args.limit} produktów")
 
         # 3. Zbieranie szczegółów każdego produktu
-        product_scraper = ProductScraper(driver=driver, logger=logger, max_retries=3)
+        product_scraper = ProductScraper(driver=driver, logger=logger, max_retries=3, policy=site_policy)
         raw_products = []
 
         total_to_scrape = len(catalog_items)

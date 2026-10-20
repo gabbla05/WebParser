@@ -10,11 +10,16 @@ from selenium.common.exceptions import WebDriverException, TimeoutException
 
 class CatalogScraper:
 
-    def __init__(self, driver, logger):
+    def __init__(self, driver, logger, policy=None):
+        """Przechowuje sterownik, logger i opcjonalną politykę dostępu do witryny."""
         self.driver = driver
         self.logger = logger
+        self.policy = policy
 
     def open_catalog(self, url: str) -> None:
+        """Otwiera katalog po sprawdzeniu polityki i czeka na przycisk doładowania."""
+        if self.policy:
+            self.policy.before_request(url)
         self.driver.get(url)
         WebDriverWait(self.driver, 20).until(
             EC.presence_of_element_located((By.ID, "btn-load-more"))

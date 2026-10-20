@@ -8,6 +8,7 @@ from processing.cleaners import normalize_missing, clean_product_record
 
 
 def test_normalize_missing_standard_phrases():
+    """Rozpoznaje typowe tekstowe oznaczenia braku danych."""
     assert normalize_missing("Brak danych") is None
     assert normalize_missing("brak informacji") is None
     assert normalize_missing("Brak danych gwarancyjnych") is None
@@ -19,12 +20,14 @@ def test_normalize_missing_standard_phrases():
 
 
 def test_normalize_missing_valid_data():
+    """Pozostawia prawidłowe wartości tekstowe bez zmian."""
     assert normalize_missing("Lenovo") == "Lenovo"
     assert normalize_missing("Windows 11") == "Windows 11"
     assert normalize_missing("16 GB") == "16 GB"
 
 
 def test_clean_product_record_missing_handling():
+    """Czyści rekord bez przerywania pracy przy brakujących polach."""
     raw = {
         "id": "1",
         "nazwa": "Laptop Testowy",
@@ -52,3 +55,20 @@ def test_clean_product_record_missing_handling():
     assert cleaned["kod_producenta"] is None
     assert cleaned["ram_gb"] == 16
     assert cleaned["dysk_ssd_gb"] == 512
+
+
+def test_clean_product_record_preserves_zero_stock_and_missing_reviews():
+    """Zachowuje stan zero i nie zamienia braku opinii na ocenę."""
+    cleaned = clean_product_record({
+        "id": "1",
+        "nazwa": "Laptop Testowy",
+        "kategoria": "Laptopy",
+        "producent": "Dell",
+        "cena": "2 500,00 zł",
+        "ocena": 4.5,
+        "liczba_opinii": None,
+        "stan_magazynowy_sztuk": 0,
+    })
+
+    assert cleaned["liczba_opinii"] is None
+    assert cleaned["stan_magazynowy_sztuk"] == 0

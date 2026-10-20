@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from openpyxl.utils import get_column_letter
 
 try:
     import pandas as pd
@@ -25,7 +26,7 @@ class DataExporter:
     """
 
     COLUMN_ORDER = [
-        "id", "nazwa", "kategoria", "producent", "cena", "cena_bazowa_pln", "waluta",
+        "id", "nazwa", "kategoria", "producent", "cena", "cena_zrodlowa", "waluta",
         "dostepnosc", "ocena", "liczba_opinii", "data_dodania", "gwarancja_miesiace",
         "procesor", "ram_gb", "dysk_ssd_gb", "karta_graficzna", "ekran_cale",
         "rozdzielczosc", "system_operacyjny", "waga_kg", "kolor", "kod_producenta",
@@ -34,10 +35,12 @@ class DataExporter:
     ]
 
     def __init__(self, output_dir: Optional[str] = None):
+        """Przygotowuje katalog docelowy eksportu."""
         self.output_dir = Path(output_dir) if output_dir else Path(__file__).resolve().parent.parent / "output"
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_fieldnames(self, products: List[Dict[str, Any]]) -> List[str]:
+        """Łączy znane kolumny w ustalonej kolejności z dodatkowymi polami."""
         all_keys = set()
         for p in products:
             all_keys.update(p.keys())

@@ -6,6 +6,7 @@
  * - Utrudnienie 5.0 #2: Losowa kolejność renderowania atrybutów w specyfikacji
  */
 
+/** Loads and renders the product identified by the current page query string. */
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const productId = parseInt(urlParams.get("id"), 10);
@@ -42,12 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }, delay);
 
+  /** Switches the detail page from its loading state to the not-found state. */
   function showError() {
     loadingEl.style.display = "none";
     errorEl.style.display = "block";
   }
 
   // Funkcja tasująca tablicę (Fisher-Yates shuffle) - wymóg 5.0: losowa kolejność cech
+  /** Returns a Fisher-Yates shuffled copy without mutating the input array. */
   function shuffle(array) {
     const copy = [...array];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -57,11 +60,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return copy;
   }
 
+  /** Renders product metadata and keyed technical specifications into the page. */
   function renderProductDetails(product) {
     loadingEl.style.display = "none";
     containerEl.style.display = "block";
 
-    // Lista cech szczegółowych (łącznie wraz z ogólnymi daje 24 atrybuty)
+    // Każda z 12 cech szczegółowych otrzymuje klucz niezależny od kolejności renderowania.
     const rawSpecs = [
       { key: "procesor", label: "Procesor", val: product.procesor },
       { key: "ram_gb", label: "Pamięć RAM", val: `${product.ram_gb} GB` },

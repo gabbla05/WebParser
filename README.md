@@ -12,7 +12,7 @@ WebParser/
 │   ├── css/
 │   │   └── style.css               # Nowoczesne style CSS
 │   ├── data/
-│   │   └── products.json           # Baza 420 produktów (25 atrybutów)
+│   │   └── products.json           # Baza 420 produktów (28 pól źródłowych)
 │   ├── js/
 │   │   ├── catalog.js              # Fetch, ładowanie porcjami, opóźnienie 400-1100ms
 │   │   └── product.js              # Podstrona produktu, interakcja, tasowanie cech
@@ -54,7 +54,7 @@ Serwis będzie dostępny pod adresem: **http://localhost:8000/**
    - Wyświetla spinner ładowania oraz informację o wyczerpaniu bazy po doładowaniu wszystkich rekordów.
 3. **Wolumen danych i cechy:**
    - **420 rekordów** w bazie (wymóg: min. 400).
-   - **25 atrybutów** każdego rekordu (wymóg: min. 22).
+   - **28 pól źródłowych** każdego rekordu (wymóg: min. 22); parser eksportuje **27 kolumn** po normalizacji.
 4. **Dwie różne struktury zapisu rekordów na liście:**
    - 70% porcji renderowane jako powtarzalne karty `<article class="product-card produkt">`.
    - 30% porcji renderowane w tabeli `<table class="products-table">` z wierszami `<tr>`.
@@ -73,7 +73,7 @@ Serwis będzie dostępny pod adresem: **http://localhost:8000/**
    - Większość w PLN (`1 299,00 zł`), część w EUR (`350,50 EUR`) i USD (`$450.00`).
    - Zastosowanie przecinków, spacji i encji `&nbsp;` jako separatorów tysięcy.
 2. **Braki wartości w wybranych polach:**
-   - Kolumny `liczba_opinii`, `gwarancja_miesiace` oraz `kod_producenta` zawierają braki danych u ok. 18% rekordów (oznaczone jako brak informacji).
+   - Braki po deduplikacji: `liczba_opinii` 18,54% oraz `gwarancja_miesiace` 19,51%; oba pola spełniają próg 15%. `kod_producenta` ma 14,88% braków i nie jest zaliczany do spełnienia progu.
 3. **Zduplikowane rekordy:**
    - Do bazy celowo wstrzyknięto **10 zduplikowanych rekordów** (ta sama nazwa, specyfikacja i cena) rozrzuconych po różnych partiach (wymóg: min. 8).
 4. **Niespójne formaty dat:**
@@ -88,3 +88,11 @@ Serwis będzie dostępny pod adresem: **http://localhost:8000/**
 2. **Losowa kolejność atrybutów w specyfikacji:**
    - Lista atrybutów w specyfikacji technicznej jest losowo tasowana przed wyrenderowaniem do DOM.
    - Parser nie może polegać na stałej pozycji w liście (np. `nth-child`), lecz musi mapować wartości po kluczu / etykiecie (`.spec-label` lub `[data-spec-key]`).
+
+### Normalizacja ceny
+- Kolumna `cena` w eksporcie zawsze zawiera wartość w PLN. Parser preferuje cenę bazową PLN przekazaną przez stronę; w jej braku przelicza walutę źródłową po kursach zgodnych z generatorem danych (1 EUR = 4,30 PLN; 1 USD = 3,95 PLN).
+- Kolumny `cena_zrodlowa` i `waluta` zachowują kwotę oraz walutę widoczną w serwisie.
+
+### Zasady dostępu
+- Przed uruchomieniem przeglądarki parser odczytuje `robots.txt` i stronę regulaminu.
+- Zabronione ścieżki są blokowane; minimalny odstęp pomiędzy nawigacjami wynika z większej wartości `Crawl-delay` i odstępu określonego w regulaminie.

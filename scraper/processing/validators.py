@@ -14,7 +14,7 @@ class ProductValidator:
         "kategoria": {"type": str, "required": True, "min_len": 2},
         "producent": {"type": str, "required": True, "min_len": 2},
         "cena": {"type": float, "required": True, "min": 1.0},
-        "cena_bazowa_pln": {"type": float, "required": False, "min": 1.0},
+        "cena_zrodlowa": {"type": float, "required": False, "min": 0.0},
         "waluta": {"type": str, "required": False, "allowed": {"PLN", "EUR", "USD"}},
         "dostepnosc": {"type": str, "required": False},
         "ocena": {"type": float, "required": False, "min": 1.0, "max": 5.0},

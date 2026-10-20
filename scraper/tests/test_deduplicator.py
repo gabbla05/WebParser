@@ -7,6 +7,7 @@ from processing.deduplicator import ProductDeduplicator
 
 
 def test_deduplicator_removes_exact_duplicates():
+    """Usuwa powtórzony produkt o innym technicznym ID."""
     products = [
         {"id": 1, "nazwa": "Laptop Dell", "producent": "Dell", "cena": 3000.0, "procesor": "i7", "ram_gb": 16},
         {"id": 2, "nazwa": "Laptop HP", "producent": "HP", "cena": 2500.0, "procesor": "i5", "ram_gb": 8},
@@ -25,6 +26,7 @@ def test_deduplicator_removes_exact_duplicates():
 
 
 def test_deduplicator_case_insensitive():
+    """Rozpoznaje duplikaty mimo różnic wielkości liter i spacji."""
     products = [
         {"id": 1, "nazwa": "Laptop Lenovo ", "producent": "LENOVO", "cena": 4000.0, "procesor": "Ryzen 7", "ram_gb": 32},
         {"id": 2, "nazwa": "laptop lenovo", "producent": "lenovo", "cena": 4000.0, "procesor": "ryzen 7", "ram_gb": 32},

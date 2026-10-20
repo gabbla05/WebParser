@@ -12,6 +12,7 @@ class ProductDeduplicator:
     DEFAULT_KEY_FIELDS = ("nazwa", "producent", "cena", "procesor", "ram_gb")
 
     def __init__(self, key_fields: Optional[Tuple[str, ...]] = None):
+        """Ustawia pola biznesowe używane do rozpoznawania duplikatów."""
         self.key_fields = key_fields or self.DEFAULT_KEY_FIELDS
 
     def build_dedup_key(self, product: Dict[str, Any]) -> tuple:
