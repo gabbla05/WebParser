@@ -34,6 +34,12 @@ class SitePolicy:
             time.sleep(remaining)
         self.last_request_at = time.monotonic()
 
+        ''' Ta funkcja sprawdza, czy URL jest dozwolony, i odczekuje wymagany czas przed nawigacją. 
+            Wartość wynika z regulaminu i robots.txt; tutaj to 1 sekunda, bo regulamin
+            wymaga 0,5 s, a robots.txt 1 s (regulamin.html:27, robots.txt:3). 
+            Ograniczenie obejmuje wejścia Selenium na strony katalogu i produktów, nie kontroluje 
+            osobno każdego żądania zasobu wysłanego przez samą przeglądarkę.'''
+
     def mark_request_complete(self) -> None:
         """Zapamiętuje zakończenie nawigacji jako początek kolejnego odstępu."""
         self.last_request_at = time.monotonic()

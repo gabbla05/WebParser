@@ -1,3 +1,10 @@
+# OBSOLETE
+#
+# OBSOLETE
+#
+# OBSOLETE
+
+
 # WebParser – Laboratorium 1 (Zadanie na ocenę 5.0)
 
 Projekt serwisu internetowego oraz parsera danych (web scraper) przygotowany w ramach Laboratorium nr 1.

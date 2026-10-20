@@ -76,7 +76,7 @@ class CatalogScraper:
                     f"Problem z doładowaniem partii. Ponawianie za {retry_delay}s (próba {consecutive_errors}/{max_retries})..."
                 )
                 time.sleep(retry_delay)
-                retry_delay *= 2
+                retry_delay *= 2 # wykładniczy wzrost opóźnienia
 
     def collect_catalog_items(self) -> List[Dict[str, Any]]:
         """

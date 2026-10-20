@@ -77,6 +77,7 @@ class ProductScraper:
             lambda d: (
                 element
                 if (element := d.find_element(By.ID, "product-details-container")).text.strip()
+                # czeka na detale, które będą wypełnione po renderowaniu JS
                 else False
             )
         )
@@ -177,7 +178,7 @@ class ProductScraper:
                     self.logger.warning(
                         f"Błąd pobierania {url} ({e}). Ponawianie za {sleep_time}s (próba {attempt}/{self.max_retries})..."
                     )
-                    backoff_delay *= 2
+                    backoff_delay *= 2 # wykładniczy wzrost opóźnienia
 
                 if attempt < self.max_retries:
                     time.sleep(sleep_time)
