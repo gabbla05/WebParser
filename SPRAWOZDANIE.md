@@ -113,7 +113,7 @@ Zgodnie z wymogami projektu, w wybranych kolumnach celowo zasymulowano braki na 
 <!-- AUTO:MISSING_TABLE:START -->
 | Nazwa kolumny | Liczba braków (szt.) | Udział procentowy (%) | Spełnienie wymogu (min. 15%) |
 | :---: | :---: | :---: | :---: |
-| `liczba_opinii` | 76 | 18.54% | ✅ Spełniony |
+| `liczba_opinii` | 79 | 19.27% | ✅ Spełniony |
 | `gwarancja_miesiace` | 80 | 19.51% | ✅ Spełniony |
 <!-- AUTO:MISSING_TABLE:END -->
 
@@ -124,7 +124,7 @@ Wszystkie braki zostały zapisane jako puste wartości (`None` w Pythonie / pust
 ### C. Weryfikacja typów kolumn i wartości odstających (Outliers)
 * Kolumny numeryczne (`cena` w PLN, `cena_zrodlowa`, `ocena`, `liczba_opinii`, `waga_kg`, `ram_gb`, `dysk_ssd_gb`) zostały przekonwertowane na typy liczbowe (`float64` / `int64`). Cena bazowa PLN ze strony jest źródłem wartości do analizy; w jej braku kwota tekstowa jest przeliczana według kursów użytych przez generator (EUR: 4,30 PLN; USD: 3,95 PLN). Kwota źródłowa i waluta pozostają zachowane osobno.
 <!-- AUTO:IQR:START -->
-* **Analiza metodą rozstępu ćwiartkowego (IQR):** Granice dla ceny wynoszą `[-3 899.62 zł; 20 961.38 zł]`. Zakres cen: 1 809.00–14 498.00 zł; liczba wartości odstających: 0.
+* **Analiza metodą rozstępu ćwiartkowego (IQR):** Granice dla ceny wynoszą `[-9 189.12 zł; 30 609.88 zł]`. Zakres cen: 3 115.00–29 062.00 zł; liczba wartości odstających: 0.
 <!-- AUTO:IQR:END -->
 
 ---
@@ -135,17 +135,17 @@ Wszystkie braki zostały zapisane jako puste wartości (`None` w Pythonie / pust
 Tabela podsumowująca parametry liczbowe oczyszczonej bazy produktów. Jeśli kilka wartości ma tę samą maksymalną częstość, w kolumnie mody podano wszystkie:
 | Cecha | Średnia | Mediana | Moda | Min | Q1 (25%) | Q3 (75%) | Max | Odch. std. |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Cena (PLN)** | 8 490.71 | 8 617.00 | 2 937.00; 5 410.00; 7 085.00; 7 195.00; 8 409.00; 9 042.00; 11 169.00; 11 900.00; 14 483.00 | 1 809.00 | 5 423.25 | 11 638.50 | 14 498.00 | 3 675.05 |
-| **Ocena (1–5)** | 4.06 | 4.10 | 4.90 | 3.10 | 3.60 | 4.50 | 5.00 | 0.55 |
-| **Liczba opinii** | 174.93 | 182.00 | 34.00; 248.00 | 3.00 | 77.50 | 253.75 | 350.00 | 100.93 |
-| **Waga (kg)** | 2.00 | 1.99 | 1.23; 1.68; 1.90 | 1.20 | 1.61 | 2.42 | 2.80 | 0.47 |
-| **Pamięć RAM (GB)** | 28.41 | 16.00 | 8.00 | 8.00 | 8.00 | 32.00 | 64.00 | 21.61 |
-| **Dysk SSD (GB)** | 1 012.76 | 1 024.00 | 2 048.00 | 256.00 | 512.00 | 2 048.00 | 2 048.00 | 703.56 |
-| **Ekran (cale)** | 15.17 | 15.60 | 13.30 | 13.30 | 14.00 | 16.00 | 17.30 | 1.48 |
-| **Porty USB (szt.)** | 3.44 | 3.00 | 2.00 | 2.00 | 2.00 | 5.00 | 5.00 | 1.15 |
-| **Bateria (Wh)** | 76.89 | 77.50 | 75.00; 80.00 | 52.00 | 65.00 | 90.00 | 99.00 | 15.49 |
-| **Gwarancja (mies.)** | 23.38 | 24.00 | 12.00 | 12.00 | 12.00 | 36.00 | 36.00 | 10.04 |
-| **Stan magazynowy (szt.)** | 22.48 | 22.00 | 7.00; 13.00 | 0.00 | 11.00 | 34.00 | 45.00 | 13.36 |
+| **Cena (PLN)** | 10 602.60 | 7 950.00 | 6 585.00; 7 924.00 | 3 115.00 | 5 735.50 | 15 685.25 | 29 062.00 | 6 130.12 |
+| **Ocena (1–5)** | 4.05 | 4.10 | 4.10 | 3.10 | 3.60 | 4.50 | 5.00 | 0.55 |
+| **Liczba opinii** | 174.50 | 176.00 | 83.00; 182.00; 186.00; 192.00; 331.00 | 2.00 | 87.00 | 259.50 | 350.00 | 99.08 |
+| **Waga (kg)** | 1.68 | 1.46 | 0.18 | 0.17 | 1.02 | 2.67 | 3.78 | 1.08 |
+| **Pamięć RAM (GB)** | 27.13 | 16.00 | 16.00 | 8.00 | 16.00 | 32.00 | 64.00 | 18.09 |
+| **Dysk SSD (GB)** | 935.34 | 1 024.00 | 1 024.00 | 256.00 | 512.00 | 1 024.00 | 2 048.00 | 590.05 |
+| **Ekran (cale)** | 14.81 | 14.00 | 13.30 | 13.30 | 13.30 | 16.00 | 17.30 | 1.48 |
+| **Porty USB (szt.)** | 3.50 | 4.00 | 4.00 | 2.00 | 2.00 | 4.00 | 5.00 | 1.13 |
+| **Bateria (Wh)** | 72.35 | 75.00 | 52.00 | 52.00 | 52.00 | 80.00 | 99.00 | 15.28 |
+| **Gwarancja (mies.)** | 25.45 | 24.00 | 36.00 | 12.00 | 12.00 | 36.00 | 36.00 | 10.27 |
+| **Stan magazynowy (szt.)** | 21.70 | 21.00 | 4.00 | 0.00 | 9.00 | 33.00 | 45.00 | 13.40 |
 <!-- AUTO:STATS_TABLE:END -->
 
 ---
@@ -158,7 +158,7 @@ Poniższy histogram przedstawia rozkład cen produktów w ofercie sklepu:
 ![Histogram cen](raport_wykresy/1_histogram_cen.png)
 
 <!-- AUTO:CHART1_COMMENT:START -->
-* **Komentarz:** Histogram przedstawia ceny w PLN w zakresie 1 809.00–14 498.00 zł. Średnia wynosi 8 490.71 zł, mediana 8 617.00 zł; IQR wykrył 0 wartości odstających.
+* **Komentarz:** Histogram przedstawia ceny w PLN w zakresie 3 115.00–29 062.00 zł. Średnia wynosi 10 602.60 zł, mediana 7 950.00 zł; IQR wykrył 0 wartości odstających.
 <!-- AUTO:CHART1_COMMENT:END -->
 
 ---
@@ -169,7 +169,7 @@ Porównanie cen w podziale na grupy asortymentowe:
 ![Box-plot cen](raport_wykresy/2_boxplot_cen_kategorie.png)
 
 <!-- AUTO:CHART2_COMMENT:START -->
-* **Komentarz:** Pudełka pokazują 50% środkowych cen, a wąsy ich zakres bez wartości odstających. Mediany kategorii mieszczą się w przedziale 7 629.00–9 474.00 zł. Najniższa mediana: ULTRABOOKI BIZNESOWE; najwyższa mediana: SMARTFONY FLAGOWE.
+* **Komentarz:** Pudełka pokazują 50% środkowych cen, a wąsy ich zakres bez wartości odstających. Mediany kategorii mieszczą się w przedziale 5 224.00–19 341.00 zł. Najniższa mediana: TABLETY 2W1; najwyższa mediana: STACJE ROBOCZE.
 <!-- AUTO:CHART2_COMMENT:END -->
 
 ---
@@ -181,8 +181,8 @@ Wykres punktowy zależności ceny od pamięci RAM i pojemności dysku SSD:
 
 * **Komentarz do korelacji:**
 <!-- AUTO:CHART3_COMMENT:START -->
-  * Współczynnik korelacji Pearsona między ceną w PLN a RAM wynosi **r ≈ 0.059**, a między ceną a SSD **r ≈ -0.016**.
-  * **Ocena merytoryczna:** Wartości bliskie zeru oznaczają słabą liniową zależność w tym zbiorze; nie należy interpretować ich jako silnej zależności rynkowej.
+  * Współczynnik korelacji Pearsona między ceną w PLN a RAM wynosi **r ≈ 0.642**, a między ceną a SSD **r ≈ 0.626**.
+  * **Ocena merytoryczna:** Otrzymane wyniki oznaczają, że między ceną komputera w PLN a pojemnością pamięci RAM oraz dysku SSD istnieje umiarkowanie silna, dodatnia korelacja liniowa. Współczynniki r ≈ 0.642 (dla RAM) oraz r ≈ 0.626 (dla SSD) wskazują, że wyższym wartościom jednej zmiennej zazwyczaj towarzyszą wyższe wartości drugiej
 <!-- AUTO:CHART3_COMMENT:END -->
 
 ---

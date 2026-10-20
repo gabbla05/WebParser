@@ -81,41 +81,175 @@ def generate_date(idx):
     else:
         return f"{random.randint(2, 6)} dni temu"
 
+# Profile kategorii aby generować nieco bardziej realistyczne dane
+CATEGORY_PROFILES = {
+    "Laptopy gamingowe": {
+        "price": (6000, 18000),
+        "weight": (2.2, 3.4),
+        "screens": ["15.6", "16.0", "17.3"],
+        "ram": [16, 32, 64],
+        "ssd": [512, 1024, 2048],
+        "battery": [75, 80, 90, 99]
+    },
+    "Ultrabooki biznesowe": {
+        "price": (3500, 9500),
+        "weight": (1.0, 1.8),
+        "screens": ["13.3", "14.0", "15.6"],
+        "ram": [16, 32],
+        "ssd": [512, 1024],
+        "battery": [65, 75, 80]
+    },
+    "Stacje robocze": {
+        "price": (8000, 22000),
+        "weight": (2.3, 3.8),
+        "screens": ["15.6", "16.0", "17.3"],
+        "ram": [32, 64],
+        "ssd": [1024, 2048],
+        "battery": [80, 90, 99]
+    },
+    "Tablety 2w1": {
+        "price": (2500, 7000),
+        "weight": (0.9, 1.6),
+        "screens": ["13.3", "14.0"],
+        "ram": [8, 16, 32],
+        "ssd": [256, 512, 1024],
+        "battery": [52, 65, 75]
+    },
+    "Smartfony flagowe": {
+        "price": (3000, 8000),
+        "weight": (0.17, 0.28),
+        "screens": ["13.3"],
+        "ram": [8, 12, 16],
+        "ssd": [256, 512, 1024],
+        "battery": [52]
+    }
+}
+
 def create_raw_product(p_id):
     """Tworzy syntetyczny produkt z celowo zróżnicowanymi formatami i brakami."""
     producer = random.choice(PRODUCERS)
     category = random.choice(CATEGORIES)
+    profile = CATEGORY_PROFILES[category]
+
     model_num = random.randint(100, 999)
     name = f"{producer} {category.split()[0]} Series-{model_num}"
-    
-    # Dodanie encji HTML w wybranych nazwach
+
     if random.random() < 0.2:
         name = name.replace(" ", "&nbsp;")
-    
-    base_price = random.randint(1800, 14500)
+
+    ram = random.choice(profile["ram"])
+    ssd = random.choice(profile["ssd"])
+    weight = round(random.uniform(*profile["weight"]), 2)
+    screen_size = random.choice(profile["screens"])
+    battery = random.choice(profile["battery"])
+
+    if category == "Laptopy gamingowe":
+        processor = random.choice([
+            "Intel Core i7-13700H",
+            "Intel Core i9-13900HX",
+            "AMD Ryzen 7 7840HS",
+            "AMD Ryzen 9 7945HX"
+        ])
+
+        gpu = random.choice([
+            "NVIDIA GeForce RTX 4060",
+            "NVIDIA GeForce RTX 4070",
+            "NVIDIA GeForce RTX 4080"
+        ])
+
+    elif category == "Ultrabooki biznesowe":
+        processor = random.choice([
+            "Intel Core i5-13500H",
+            "Intel Core i7-13700H",
+            "AMD Ryzen 7 7840HS",
+            "Apple M2 Pro",
+            "Apple M3 Max"
+        ])
+
+        gpu = random.choice([
+            "Intel Iris Xe Graphics",
+            "AMD Radeon 780M",
+            "Apple Integrated GPU 16-core"
+        ])
+
+    elif category == "Stacje robocze":
+        processor = random.choice([
+            "Intel Core i9-13900HX",
+            "AMD Ryzen 9 7945HX",
+            "Apple M3 Max"
+        ])
+
+        gpu = random.choice([
+            "NVIDIA GeForce RTX 4070",
+            "NVIDIA GeForce RTX 4080"
+        ])
+
+    elif category == "Tablety 2w1":
+        processor = random.choice([
+            "Intel Core i5-13500H",
+            "Intel Core i7-13700H",
+            "AMD Ryzen 5 7600X"
+        ])
+
+        gpu = random.choice([
+            "Intel Iris Xe Graphics",
+            "AMD Radeon 780M"
+        ])
+
+    else:  # Smartfony flagowe
+
+        processor = "Qualcomm Snapdragon X Elite"
+
+        gpu = random.choice([
+            "AMD Radeon 780M",
+            "Apple Integrated GPU 16-core"
+        ])
+
+    price_min, price_max = profile["price"]
+    base_price = random.randint(price_min, price_max)
+
+    base_price += ram * 20
+    base_price += (ssd // 256) * 150
+
+    if "i9" in processor:
+        base_price += 1500
+
+    if "Ryzen 9" in processor:
+        base_price += 1200
+
+    if "RTX 4080" in gpu:
+        base_price += 3500
+    elif "RTX 4070" in gpu:
+        base_price += 1800
+    elif "RTX 4060" in gpu:
+        base_price += 800
+
+    base_price = int(base_price)
+
     curr_rand = random.random()
+
     if curr_rand < 0.75:
         currency = "PLN"
     elif curr_rand < 0.90:
         currency = "EUR"
     else:
         currency = "USD"
-        
+
     formatted_price = format_price(base_price, currency)
+
     rating = round(random.uniform(3.1, 5.0), 1)
-    
-    # Braki danych u 15-20% rekordów
+
     reviews_count = None if random.random() < 0.18 else random.randint(1, 350)
     warranty_months = None if random.random() < 0.18 else random.choice([12, 24, 36])
-    mfg_code = None if random.random() < 0.15 else f"{producer[:2].upper()}-{model_num}-{random.randint(1000, 9999)}"
 
-    ram = random.choice([8, 16, 32, 64])
-    ssd = random.choice([256, 512, 1024, 2048])
-    weight = round(random.uniform(1.2, 2.8), 2)
+    mfg_code = (
+        None
+        if random.random() < 0.15
+        else f"{producer[:2].upper()}-{model_num}-{random.randint(1000,9999)}"
+    )
+
     ports = random.choice([2, 3, 4, 5])
-    battery = random.choice([52, 65, 75, 80, 90, 99])
-    
-    # Atrybuty celowo dostępne WYŁĄCZNIE w data-* (utrudnienie 4.0)
+
     vat_rate = "23%"
     stock_exact = random.randint(0, 45)
     energy_class = random.choice(["A+++", "A++", "A+", "B", "C"])
@@ -134,16 +268,14 @@ def create_raw_product(p_id):
         "data_dodania": generate_date(p_id),
         "gwarancja_miesiace": warranty_months,
         "link_szczegoly": f"product.html?id={p_id}",
-        # Atrybuty ukryte w data-*
         "stawka_vat": vat_rate,
         "stan_magazynowy_sztuk": stock_exact,
         "klasa_energetyczna": energy_class,
-        # Dodatkowe cechy do podstrony szczegółów (łącznie > 25 atrybutów)
-        "procesor": random.choice(PROCESSORS),
+        "procesor": processor,
         "ram_gb": ram,
         "dysk_ssd_gb": ssd,
-        "karta_graficzna": random.choice(GRAPHICS),
-        "ekran_cale": float(random.choice(SCREENS)),
+        "karta_graficzna": gpu,
+        "ekran_cale": float(screen_size),
         "rozdzielczosc": random.choice(RESOLUTIONS),
         "system_operacyjny": random.choice(OS_LIST),
         "waga_kg": weight,
