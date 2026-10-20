@@ -203,14 +203,3 @@ PS C:\Users\...\WebParser> (Set-ExecutionPolicy -Scope Process -ExecutionPolicy 
 2026-10-20 16:36:04,291 | INFO    | Przeglądarka została zamknięta.
 (.venv) PS C:\Users\...\WebParser> 
 ```
-
-<!-- ## 5. Ściągawka na obronę projektu (Odpowiedzi na pytania prowadzącego)
-
-1. **Pytanie: Dlaczego w katalogu głównym jest przycisk „Wczytaj więcej”, a nie 5 tradycyjnych podstron?**
-   * **Odpowiedź:** W zadaniu na poziom 5.0 wprost jest wymagane: *„doładowywanie porcjami — przycisk «Wczytaj więcej» lub doładowanie przy przewijaniu”* oraz dla parsera: *„obsługa doładowywania aż do wyczerpania rekordów”*. Dynamiczny infinite scroll/button na poziomie 5.0 zastępuje statyczną paginację numeryczną z 4.0. Podstronami są natomiast dedykowane karty szczegółów produktów (`product.html?id=...`), których jest 420.
-2. **Pytanie: Dlaczego zwykły parser `requests` nie zadziała na Waszym serwisie?**
-   * **Odpowiedź:** Ponieważ w źródle HTML (`index.html`) jest 0 produktów (Ctrl+U pokazuje pusty kontener). Wszystkie dane są dociągane asynchronicznie przez JavaScript (`fetch`) ze sztucznym opóźnieniem. Scraper musi wykonywać JavaScript w silniku przeglądarki (Selenium).
-3. **Pytanie: Jak zrealizowano obsługę błędu 429 i Retry-After?**
-   * **Odpowiedź:** Serwer w `run_server.py` liczy żądania na sekundę. Przy przekroczeniu 10 RPS zwraca kod 429 z nagłówkiem `Retry-After: 2`. Scraper w `product_scraper.py` wykrywa tę odpowiedź i usypia wątek dokładnie na czas wskazany w nagłówku, po czym ponawia próbę (exponential backoff).
-4. **Pytanie: Ile było duplikatów i jak zostały usunięte?**
-   * **Odpowiedź:** W bazie wygenerowano 10 celowych duplikatów (rekordy o identycznej nazwie, specyfikacji i cenie, lecz innym technicznym ID). Moduł `deduplicator.py` porównuje krotki cech biznesowych i odrzucił dokładnie te 10 powtórzeń (z 420 zostało 410 unikalnych rekordów). -->
